@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id               String           @id @default(cuid())
+  name             String
+  slug             String           @unique
+  phone            String?
+  email            String?
+  address          String?
+  logoUrl          String?
+  active           Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  users            User[]
+  patients         Patient[]
+  appointments     Appointment[]
+  leads            Lead[]
+  conversations    Conversation[]
+  financialEntries FinancialEntry[]
+  medicalRecords   MedicalRecord[]
+  services         ClinicService[]
+  settings         ClinicSettings?
+}
+
+model User {
+  id               String   @id @default(cuid())
+  clinicId         String
+  name             String
+  email            String   @unique
+  password         String
+  role             Role
+  active           Boolean  @default(true)
+  refreshTokenHash String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  clinic           Clinic   @relation(fields: [clinicId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  RECEPCIONISTA
+  DENTISTA
+  FINANCEIRO
+}
+
+model Patient {
+  id               String          @id @default(cuid())
+  clinicId         String
+  name             String
+  phone            String
+  email            String?
+  birthDate        DateTime?
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  clinic           Clinic          @relation(fields: [clinicId], references: [id])
+  appointments     Appointment[]
+  records          MedicalRecord[]
+  anamnesis        Anamnesis?
+  financialEntries FinancialEntry[]
+}
+
+model Appointment {
+  id        String            @id @default(cuid())
+  clinicId  String
+  patientId String
+  dentistId String
+  datetime  DateTime
+  duration  Int               @default(60)
+  status    AppointmentStatus @default(AGENDADA)
+  service   String
+  notes     String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  clinic    Clinic            @relation(fields: [clinicId], references: [id])
+  patient   Patient           @relation(fields: [patientId], references: [id])
+}
+
+enum AppointmentStatus {
+  AGENDADA
+  CONFIRMADA
+  CONCLUIDA
+  CANCELADA
+  FALTA
+}
+
+model Lead {
+  id         String         @id @default(cuid())
+  clinicId   String
+  name       String
+  phone      String
+  email      String?
+  source     LeadSource
+  stage      LeadStage      @default(NOVO)
+  notes      String?
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  clinic     Clinic         @relation(fields: [clinicId], references: [id])
+  activities LeadActivity[]
+}
+
+model LeadActivity {
+  id        String   @id @default(cuid())
+  leadId    String
+  type      String
+  content   String
+  createdAt DateTime @default(now())
+  lead      Lead     @relation(fields: [leadId], references: [id])
+}
+
+enum LeadSource {
+  WHATSAPP
+  INSTAGRAM
+  AGENDAMENTO_ONLINE
+  MANUAL
+}
+
+enum LeadStage {
+  NOVO
+  CONTATADO
+  AGENDADO
+  ATIVO
+  RECORRENTE
+}
+
+model Conversation {
+  id           String    @id @default(cuid())
+  clinicId     String
+  channel      Channel
+  externalId   String
+  patientId    String?
+  leadId       String?
+  unreadCount  Int       @default(0)
+  contactName  String?
+  contactPhone String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  clinic       Clinic    @relation(fields: [clinicId], references: [id])
+  messages     Message[]
+}
+
+enum Channel {
+  WHATSAPP
+  INSTAGRAM
+}
+
+model Message {
+  id             String        @id @default(cuid())
+  conversationId String
+  body           String
+  fromMe         Boolean       @default(false)
+  status         MessageStatus @default(SENT)
+  timestamp      DateTime      @default(now())
+  conversation   Conversation  @relation(fields: [conversationId], references: [id])
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+  FAILED
+}
+
+model MedicalRecord {
+  id            String       @id @default(cuid())
+  clinicId      String
+  patientId     String
+  dentistId     String
+  appointmentId String?
+  type          RecordType   @default(CONSULTA)
+  title         String
+  notes         String
+  teeth         String[]
+  procedures    String[]
+  files         RecordFile[]
+  anamnesis     Anamnesis?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  clinic        Clinic       @relation(fields: [clinicId], references: [id])
+  patient       Patient      @relation(fields: [patientId], references: [id])
+}
+
+enum RecordType {
+  CONSULTA
+  RETORNO
+  EMERGENCIA
+  AVALIACAO
+  PROCEDIMENTO
+}
+
+model RecordFile {
+  id              String        @id @default(cuid())
+  medicalRecordId String
+  name            String
+  url             String
+  key             String
+  type            String
+  size            Int
+  createdAt       DateTime      @default(now())
+  medicalRecord   MedicalRecord @relation(fields: [medicalRecordId], references: [id])
+}
+
+model Anamnesis {
+  id              String         @id @default(cuid())
+  patientId       String         @unique
+  medicalRecordId String?        @unique
+  token           String         @unique @default(cuid())
+  completedAt     DateTime?
+  allergies       String?
+  medications     String?
+  illnesses       String?
+  surgeries       String?
+  pregnant        Boolean?
+  smoker          Boolean?
+  notes           String?
+  createdAt       DateTime       @default(now())
+  patient         Patient        @relation(fields: [patientId], references: [id])
+  medicalRecord   MedicalRecord? @relation(fields: [medicalRecordId], references: [id])
+}
+
+model FinancialEntry {
+  id            String         @id @default(cuid())
+  clinicId      String
+  patientId     String?
+  appointmentId String?
+  dentistId     String?
+  description   String
+  amount        Float
+  type          EntryType      @default(RECEITA)
+  category      String?
+  status        PaymentStatus  @default(PENDENTE)
+  paymentMethod PaymentMethod?
+  dueDate       DateTime?
+  paidAt        DateTime?
+  notes         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  clinic        Clinic         @relation(fields: [clinicId], references: [id])
+  patient       Patient?       @relation(fields: [patientId], references: [id])
+}
+
+enum EntryType {
+  RECEITA
+  DESPESA
+}
+
+enum PaymentMethod {
+  DINHEIRO
+  PIX
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  BOLETO
+  TRANSFERENCIA
+}
+
+enum PaymentStatus {
+  PENDENTE
+  PAGO
+  VENCIDO
+}
+
+model ClinicService {
+  id          String  @id @default(cuid())
+  clinicId    String
+  name        String
+  description String?
+  duration    Int     @default(60)
+  price       Float?
+  active      Boolean @default(true)
+  clinic      Clinic  @relation(fields: [clinicId], references: [id])
+}
+
+model ClinicSettings {
+  id                String  @id @default(cuid())
+  clinicId          String  @unique
+  workingDays       Int[]
+  workingHoursStart String  @default("08:00")
+  workingHoursEnd   String  @default("18:00")
+  slotDuration      Int     @default(60)
+  bookingEnabled    Boolean @default(true)
+  bookingMessage    String?
+  primaryColor      String  @default("#29d9d5")
+  clinic            Clinic  @relation(fields: [clinicId], references: [id])
+}

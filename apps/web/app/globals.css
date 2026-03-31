@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #29d9d5;
+  --brand-hover: #22b8b4;
+  --brand-bg: #e8fffe;
+  --brand-border: rgba(41, 217, 213, 0.25);
+  --surface: #ffffff;
+  --surface-2: #e8fffe;
+  --border: rgba(41, 217, 213, 0.2);
+  --text: #141414;
+  --text-muted: #555555;
+  --ink: #141414;
+
+  /* shadcn/ui tokens */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 8%;
+  --primary: 178 68% 51%;
+  --primary-foreground: 0 0% 8%;
+  --secondary: 178 68% 95%;
+  --secondary-foreground: 0 0% 8%;
+  --muted: 178 30% 95%;
+  --muted-foreground: 0 0% 33%;
+  --accent: 178 68% 95%;
+  --accent-foreground: 0 0% 8%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 178 30% 88%;
+  --input: 178 30% 88%;
+  --ring: 178 68% 51%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 0 0% 8%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 10%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 178 68% 51%;
+  --primary-foreground: 0 0% 8%;
+  --secondary: 0 0% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 65%;
+  --accent: 0 0% 15%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 178 68% 51%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}

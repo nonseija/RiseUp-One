@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm install:*)",
+      "Bash(find \"c:/Users/CPU/Desktop/Edited/Rise SaaS/apps/web/app/\\(dashboard\\)/configuracoes\" -type f -name \"*.tsx\" -o -name \"*.ts\")",
+      "Bash(ls \"c:/Users/CPU/Desktop/Edited/Rise SaaS/apps/web/app/\\(dashboard\\)/configuracoes/\")",
+      "Bash(curl -s -X POST http://localhost:3001/api/auth/register -H \"Content-Type: application/json\" -d \"{\"\"clinicName\"\":\"\"Clinica Teste\"\",\"\"adminName\"\":\"\"Felipe\"\",\"\"email\"\":\"\"teste2@teste.com\"\",\"\"password\"\":\"\"123456789\"\",\"\"confirmPassword\"\":\"\"123456789\"\"}\")"
+    ]
+  }
+}
